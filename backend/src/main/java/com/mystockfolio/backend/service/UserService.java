@@ -1,16 +1,21 @@
 package com.mystockfolio.backend.service;
 
+import com.mystockfolio.backend.domain.entity.Portfolio;
+import com.mystockfolio.backend.domain.entity.RewardHistory;
 import com.mystockfolio.backend.domain.entity.User;
 import com.mystockfolio.backend.dto.UserDto;
 import com.mystockfolio.backend.exception.ForbiddenException;
 import com.mystockfolio.backend.exception.ResourceNotFoundException;
 import com.mystockfolio.backend.repository.PortfolioRepository;
+import com.mystockfolio.backend.repository.RewardHistoryRepository;
 import com.mystockfolio.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -19,6 +24,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PortfolioRepository portfolioRepository;
+    private final RewardHistoryRepository rewardHistoryRepository;
     private final PasswordEncoder passwordEncoder;
 
     // 사용자 프로필 조회
@@ -80,7 +86,7 @@ public class UserService {
                 .build();
     }
 
-    // 사용자 계정 삭제 (비밀번호 확인 포함)
+    // 사용자 계정 삭제 (비밀번호 확인 필수)
     @Transactional
     public void deleteAccount(Long userId, UserDto.DeleteConfirmRequest requestDto) {
         User user = userRepository.findById(userId)
@@ -88,30 +94,45 @@ public class UserService {
 
         log.info("계정 삭제 요청 - userId: {}, provider: {}", userId, user.getProvider());
 
-        // 일반 회원가입 사용자(mystockfolio)는 비밀번호 확인 필요
+        // 일반 회원가입 사용자(mystockfolio)만 비밀번호 확인 필요
         boolean isMystockfolioUser = "mystockfolio".equals(user.getProvider()) && user.getPassword() != null;
-        
+
         if (isMystockfolioUser) {
             if (requestDto.getPassword() == null || requestDto.getPassword().isEmpty()) {
                 throw new IllegalArgumentException("계정 삭제를 위해 비밀번호 확인이 필요합니다.");
             }
-            
+
             if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
                 throw new ForbiddenException("비밀번호가 일치하지 않습니다.");
             }
             log.info("일반 회원가입 사용자 비밀번호 확인 완료");
         } else {
-            // 소셜 로그인 사용자 (Google, MetaMask, Kakao, Naver 등)는 비밀번호 확인 불필요
-            log.info("소셜 로그인 사용자 ({})는 비밀번호 확인 없이 계정 삭제 진행", user.getProvider());
+            // 소셜 로그인 사용자(Google, MetaMask, Kakao, Naver 등)는 비밀번호 확인 생략
+            log.info("소셜 로그인 사용자({})는 비밀번호 확인 없이 계정 삭제 진행", user.getProvider());
         }
 
-        // 사용자 관련 데이터 삭제
-        // 포트폴리오와 자산도 함께 삭제 (Cascade 또는 수동 삭제)
-        long portfolioCount = portfolioRepository.countByUserId(userId);
-        if (portfolioCount > 0) {
-            log.info("사용자 포트폴리오 {}개 삭제 시작", portfolioCount);
-            portfolioRepository.deleteAll(portfolioRepository.findByUserId(userId));
+        // 사용자 관련 리워드 히스토리 삭제
+        List<RewardHistory> rewardHistories = rewardHistoryRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        if (rewardHistories != null && !rewardHistories.isEmpty()) {
+            log.info("사용자 리워드 히스토리 {}개 삭제 시작", rewardHistories.size());
+            rewardHistoryRepository.deleteAll(rewardHistories);
+            log.info("사용자 리워드 히스토리 삭제 완료");
+        } else {
+            log.info("삭제할 리워드 히스토리가 없습니다.");
+        }
+
+        // 사용자 관련 포트폴리오 삭제
+        // 포트폴리오에 속한 자산 삭제 (Cascade로 자동 삭제됨)
+        List<Portfolio> portfolios = portfolioRepository.findByUserId(userId);
+        if (portfolios != null && !portfolios.isEmpty()) {
+            log.info("사용자 포트폴리오 {}개 삭제 시작", portfolios.size());        
+            // 각 포트폴리오를 개별적으로 삭제 (Cascade로 자산도 자동 삭제됨)
+            for (Portfolio portfolio : portfolios) {
+                portfolioRepository.delete(portfolio);
+            }
             log.info("사용자 포트폴리오 삭제 완료");
+        } else {
+            log.info("삭제할 포트폴리오가 없습니다.");
         }
 
         // 사용자 삭제
@@ -127,12 +148,28 @@ public class UserService {
 
         log.info("계정 삭제 요청 (비밀번호 확인 없음) - userId: {}", userId);
 
-        // 사용자 관련 데이터 삭제
-        long portfolioCount = portfolioRepository.countByUserId(userId);
-        if (portfolioCount > 0) {
-            log.info("사용자 포트폴리오 {}개 삭제 시작", portfolioCount);
-            portfolioRepository.deleteAll(portfolioRepository.findByUserId(userId));
+        // 사용자 관련 리워드 히스토리 삭제
+        List<RewardHistory> rewardHistories = rewardHistoryRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        if (rewardHistories != null && !rewardHistories.isEmpty()) {
+            log.info("사용자 리워드 히스토리 {}개 삭제 시작", rewardHistories.size());
+            rewardHistoryRepository.deleteAll(rewardHistories);
+            log.info("사용자 리워드 히스토리 삭제 완료");
+        } else {
+            log.info("삭제할 리워드 히스토리가 없습니다.");
+        }
+
+        // 사용자 관련 포트폴리오 삭제
+        // 포트폴리오에 속한 자산 삭제 (Cascade로 자동 삭제됨)
+        List<Portfolio> portfolios = portfolioRepository.findByUserId(userId);
+        if (portfolios != null && !portfolios.isEmpty()) {
+            log.info("사용자 포트폴리오 {}개 삭제 시작", portfolios.size());        
+            // 각 포트폴리오를 개별적으로 삭제 (Cascade로 자산도 자동 삭제됨)
+            for (Portfolio portfolio : portfolios) {
+                portfolioRepository.delete(portfolio);
+            }
             log.info("사용자 포트폴리오 삭제 완료");
+        } else {
+            log.info("삭제할 포트폴리오가 없습니다.");
         }
 
         // 사용자 삭제

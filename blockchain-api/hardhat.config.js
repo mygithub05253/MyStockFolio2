@@ -19,12 +19,17 @@ module.exports = {
     localhost: {
       url: "http://127.0.0.1:8545",
       chainId: 1337,
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],       
     },
     sepolia: {
-      url: process.env.RPC_URL || "",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      url: process.env.SEPOLIA_RPC_URL || process.env.RPC_URL || "",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],       
       chainId: 11155111,
+    },
+    bifrost: {
+      url: process.env.BIFROST_RPC_URL || "https://public-01.testnet.thebifrost.io/rpc",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 49088,
     },
   },
   paths: {

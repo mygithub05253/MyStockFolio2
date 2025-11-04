@@ -6,17 +6,36 @@ let folioTokenContract;
 let nftContract;
 
 /**
+ * Get RPC URL based on network name
+ */
+function getRpcUrl() {
+    const network = (process.env.NETWORK || 'localhost').toLowerCase();
+    
+    switch (network) {
+        case 'sepolia':
+            return process.env.SEPOLIA_RPC_URL || process.env.RPC_URL;
+        case 'bifrost':
+            return process.env.BIFROST_RPC_URL || 'https://public-01.testnet.thebifrost.io/rpc';
+        case 'localhost':
+        case 'local':
+        default:
+            return process.env.RPC_URL || 'http://127.0.0.1:8545';
+    }
+}
+
+/**
  * Web3 Provider 초기화
  */
 function initializeProvider() {
-    const rpcUrl = process.env.RPC_URL;
-    
+    const rpcUrl = getRpcUrl();
+    const network = (process.env.NETWORK || 'localhost').toLowerCase();
+
     if (!rpcUrl) {
-        throw new Error('RPC_URL environment variable is required');
+        throw new Error(`RPC_URL for ${network} network is required. Please set ${network.toUpperCase()}_RPC_URL or RPC_URL in .env file.`);
     }
 
     provider = new ethers.JsonRpcProvider(rpcUrl);
-    console.log(`✅ Provider initialized: ${process.env.NETWORK || 'localhost'}`);
+    console.log(`✅ Provider initialized: ${network} (${rpcUrl})`);
 
     // Private Key로 Signer 생성
     const privateKey = process.env.PRIVATE_KEY;
@@ -24,10 +43,10 @@ function initializeProvider() {
         signer = new ethers.Wallet(privateKey, provider);
         console.log(`✅ Signer initialized: ${signer.address}`);
     } else {
-        console.warn('⚠️ PRIVATE_KEY not set, read-only mode');
+        console.warn('⚠️  PRIVATE_KEY not set, read-only mode');
     }
 
-    // 컨트랙트 인스턴스 생성
+    // 스마트 컨트랙트 인스턴스 생성
     const folioTokenAddress = process.env.FOLIO_TOKEN_ADDRESS;
     const nftAddress = process.env.NFT_CONTRACT_ADDRESS;
 
@@ -38,7 +57,7 @@ function initializeProvider() {
             folioTokenABI,
             signer
         );
-        console.log(`✅ FolioToken contract connected: ${folioTokenAddress}`);
+        console.log(`✅ FolioToken contract connected: ${folioTokenAddress}`);   
     }
 
     if (nftAddress && signer) {
