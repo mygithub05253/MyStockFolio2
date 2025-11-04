@@ -1,0 +1,43 @@
+{
+  "name": "blockchain-api",
+  "version": "1.0.0",
+  "description": "MyStockFolio Blockchain API Service - ERC-20 Token & ERC-721 NFT",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "extract-abi": "node scripts/extract-abi.js",
+    "postcompile": "npm run extract-abi",
+    "test": "hardhat test"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "erc20",
+    "erc721",
+    "nft",
+    "web3"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@pinata/sdk": "^2.1.0",
+    "axios": "^1.12.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.15.0",
+    "express": "^4.18.2",
+    "form-data": "^4.0.4",
+    "ipfs-http-client": "^60.0.1"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.4.0",
+    "hardhat": "^2.26.5",
+    "nodemon": "^3.1.10"
+  }
+}

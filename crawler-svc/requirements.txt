@@ -1,0 +1,11 @@
+# crawler-svc/requirements.txt
+
+fastapi
+uvicorn[standard]
+requests
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+selenium>=4.15.0
+python-dotenv
+yfinance
+

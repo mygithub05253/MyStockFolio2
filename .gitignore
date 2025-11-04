@@ -1,0 +1,161 @@
+# ========================================
+# Node.js Dependencies
+# ========================================
+node_modules/
+frontend/node_modules
+backend-blockchain/node_modules
+*/node_modules/
+
+# ========================================
+# Build Artifacts
+# ========================================
+build/
+dist/
+out/
+backend/build/
+backend-main/build
+backend-main/out
+frontend/build/
+frontend/dist/
+*.class
+*.jar
+*.war
+*.ear
+
+# ========================================
+# Python
+# ========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+backend-marketdata/__pycache__
+backend-marketdata/venv
+market-data-svc/__pycache__
+market-data-svc/venv
+analytics-svc/__pycache__
+analytics-svc/venv
+*.pyc
+*.pyo
+*.pyd
+
+# ========================================
+# Security & Configuration Files (중요!)
+# ========================================
+# 환경 변수 파일
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*
+*.env
+backend/.env
+backend-blockchain/.env
+backend/src/main/resources/.env
+market-data-svc/.env
+analytics-svc/.env
+crawler-svc/.env
+blockchain-api/.env
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# Spring Boot 설정 파일 (민감 정보 포함)
+backend/src/main/resources/application.properties
+backend/src/main/resources/application-local.properties
+backend/src/main/resources/application-dev.properties
+backend/src/main/resources/application-prod.properties
+backend/src/main/resources/application-*.properties
+**/application*.properties
+!**/application*.properties.example
+!backend/src/main/resources/application.properties.example
+!backend/application.properties.example
+
+# 블록체인 관련 보안 파일
+blockchain-api/.env
+blockchain-api/private-key*
+blockchain-api/*.key
+blockchain-api/contracts/.env
+contracts/.env
+*.private
+*.secret
+
+# 로그 파일 (민감 정보 포함 가능)
+*.log
+logs/
+backend/logs/
+backend/*.log
+backend.log
+*.log.*
+
+# Private Keys & Certificates
+*.key
+*.pem
+*.p12
+*.jks
+*.pfx
+*.crt
+*.cer
+*private*
+*secret*
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Redis Dump Files
+dump.rdb
+
+# OAuth2 Client Secrets
+**/oauth2-*.json
+**/*client-secret*.json
+
+# JWT Secrets
+**/jwt-secret*
+
+# ========================================
+# IDE & Editor
+# ========================================
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ========================================
+# AI & Development Tools
+# ========================================
+.cursor/
+.cursorrules
+
+# ========================================
+# Temporary Files
+# ========================================
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+
+# ========================================
+# Docker
+# ========================================
+docker-compose.override.yml
+*.dockerignore.local
