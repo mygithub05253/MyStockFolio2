@@ -301,7 +301,11 @@ const MyPage = () => {
 
     // userInfo가 로드되지 않았을 경우 처리
     if (!userInfo) {
-        return <div className="container mx-auto p-4 max-w-2xl">사용자 정보를 불러오는 중...</div>;
+        return (
+            <div className="container mx-auto p-4 max-w-2xl">
+                <p className="text-gray-600">로그인이 필요합니다.</p>
+            </div>
+        );
     }
 
     const isMystockfolioUser = userInfo?.provider === 'mystockfolio' || !userInfo?.provider;

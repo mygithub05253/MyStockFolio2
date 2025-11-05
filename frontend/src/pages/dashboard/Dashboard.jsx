@@ -110,7 +110,12 @@ const Dashboard = () => {
                 const resp = await axiosInstance.get('/api/market/indices');
                 setMarketIndices(Array.isArray(resp.data) ? resp.data : []);
             } catch (err) {
-                console.error('시장 지수 로드 실패:', err);
+                // 타임아웃 또는 기타 에러 처리 - 앱이 멈추지 않도록 빈 배열 설정
+                if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+                    console.warn('시장 지수 로드 타임아웃 (서버 응답 지연)');
+                } else {
+                    console.error('시장 지수 로드 실패:', err);
+                }
                 setMarketIndices([]);
             }
         };
@@ -125,7 +130,12 @@ const Dashboard = () => {
                 const resp = await axiosInstance.get('/api/market/top', { params: { category: 'gainers' } });
                 setTopGainers(Array.isArray(resp.data) ? resp.data.slice(0, 3) : []);
             } catch (err) {
-                console.error('Top gainers 로드 실패:', err);
+                // 타임아웃 또는 기타 에러 처리 - 앱이 멈추지 않도록 빈 배열 설정
+                if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+                    console.warn('Top gainers 로드 타임아웃 (서버 응답 지연)');
+                } else {
+                    console.error('Top gainers 로드 실패:', err);
+                }
                 setTopGainers([]);
             }
         };

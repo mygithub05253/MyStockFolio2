@@ -14,6 +14,7 @@ function App() {
 
   useEffect(() => {
     const initializeAuth = async () => {
+      // OAuth2 콜백 페이지는 인증 초기화 스킵
       if (window.location.pathname === '/oauth2/callback' || window.location.pathname === '/oauth2/signup') {
         return;
       }
@@ -21,29 +22,27 @@ function App() {
       const token = sessionStorage.getItem('accessToken');
       
       if (token) {
+        // sessionStorage에서 이미 사용자 정보가 복원되었는지 확인
+        // (modules/user.js에서 초기 상태로 복원됨)
+        
+        // 백그라운드에서 최신 사용자 정보로 업데이트 (조용히 실행)
         try {
-          const response = await Promise.race([
-            axiosInstance.get('/api/user/profile'),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Timeout')), 10000)
-            )
-          ]);
-          
+          const response = await axiosInstance.get('/api/user/profile');
           const { userId, email, nickname, provider, walletAddress } = response.data;
           dispatch(loginSuccess({ userId, email, nickname, provider, walletAddress }));
-          console.log('로그인 상태 복원:', { userId, email, nickname, provider });
+          console.log('사용자 정보 업데이트 완료:', { userId, email, nickname, provider });
         } catch (error) {
-          // 401 에러가 아니면 토큰을 유지 (네트워크 오류 등일 수 있음)
+          // 401 에러인 경우에만 로그아웃 처리
           if (error.response && error.response.status === 401) {
-            console.error('토큰 검증 실패 (401):', error);
+            console.error('토큰 검증 실패 (401), 로그아웃 처리:', error);
             sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('userInfo');
             dispatch(resetPortfolio());
             dispatch(resetDashboard());
             dispatch(resetRewards());
             dispatch(logout());
-          } else {
-            console.warn('인증 확인 실패 (네트워크 오류 가능):', error.message);
           }
+          // 다른 에러(네트워크 오류 등)는 무시하고 저장된 정보 사용
         }
       }
     };

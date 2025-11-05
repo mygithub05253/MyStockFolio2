@@ -106,9 +106,16 @@ const Market = () => {
         const enriched = list.length ? list : defaultPopular;
         setPopular(enriched);
       } catch (e) {
-        console.warn('인기 종목 로드 실패:', e);
+        // 타임아웃 또는 기타 에러 처리
+        if (e.code === 'ECONNABORTED' || e.message?.includes('timeout')) {
+          console.warn('인기 종목 로드 타임아웃 (서버 응답 지연), 기본 목록 사용');
+        } else {
+          console.warn('인기 종목 로드 실패:', e);
+        }
         // 네트워크/503 시 기본 목록 사용
-        setPopular(defaultPopular);
+        if (isMounted) {
+          setPopular(defaultPopular);
+        }
       }
     };
     loadPopular();
